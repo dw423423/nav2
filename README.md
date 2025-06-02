@@ -172,7 +172,8 @@ pointcloud_topic: "/livox/lidar"
 ```
 
  **其他** 
-ros2有很多topic，刚开始学时被弄的头晕了，网上找来找去，始终不知道什么是/map,/odom,/base_link，等
+
+ros2有很多topic，刚开始学时被弄的头晕了，网上找来找去，始终不知道/map,/odom,/base_link
 
 他们之间谁能继承谁，谁链接谁一点都不懂，也不知道该如何链接mid360的livox_frame以及其他的，
 
