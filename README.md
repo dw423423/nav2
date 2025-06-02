@@ -39,6 +39,7 @@ icp_registration  --- 使用icp进行定位
 或者
 
 `./build.sh`
+
 编译 octomap_server2时会报警告，不理就行
 
 **3、运行** 
