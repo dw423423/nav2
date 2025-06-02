@@ -15,11 +15,15 @@ livox_ros_driver2 --- 获取mid360雷达点云
 
 serial_node --- 底盘串口通信
 
+
+
 lio：    建图算法
 
 FAST_LIO --- fast_lio建图
 
 point_lio --- point_lio建图(无法使用)
+
+
 
 
 mapper:  二维、三维栅格建图以及点云处理
@@ -31,9 +35,13 @@ pcd2pgm --- 用于读取点云的pcd文件，并在/map上发布二维的栅格�
 pointcloud_to_laserscan --- 将mid360的点云数据转换成的激光雷达数据，用于导航
 
 
+
+
 navigation：导航包以及导航相关算法
 
 robot_navigation2 --- 使用navigation2进行导航
+
+
 
 
 registration:    定位算法
@@ -41,6 +49,8 @@ registration:    定位算法
 amcl_registration --- 使用amcl进行定位
 
 icp_registration  --- 使用icp进行定位
+
+
 
 
  **2、编译** 
