@@ -75,7 +75,7 @@ registration:    定位算法
 
 `./mapping.sh`
 
-在建图前，先配置将mid360的ip配置一下，网上有教程，目录在driver/config/MID360_config.json,
+在建图前，先配置将mid360的ip配置一下，网上有教程，目录在driver/livox_ros_driver2/config/MID360_config.json,
 
 然后再前往lio/FAST_LIO/config/mid360.yaml中，检查是否满足以下情况
 
