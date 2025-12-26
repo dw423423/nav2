@@ -27,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: CloudMap
+    SyncSource: CloudRegistered
 Visualization Manager:
   Class: ""
   Displays:
@@ -121,8 +121,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 8.18807315826416
-        Min Value: -0.6974490880966187
+        Max Value: 3.7454912662506104
+        Min Value: -0.3052697479724884
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -287,7 +287,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 12.80388069152832
+      Distance: 15.829906463623047
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -302,10 +302,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9947969913482666
+      Pitch: 1.0297967195510864
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 1.8603668212890625
+      Yaw: 3.870368480682373
     Saved: ~
 Window Geometry:
   Displays:
@@ -323,5 +323,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1453
-  X: 368
-  Y: 104
+  X: 218
+  Y: 88

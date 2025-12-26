@@ -46,7 +46,7 @@
   },
   "lidar_configs" : [
     {
-      "ip" : "192.168.1.133",
+      "ip" : "192.168.1.100",
       "pcl_data_type" : 1,
       "pattern_mode" : 0,
       "extrinsic_parameter" : {
@@ -59,7 +59,7 @@
       }
     },
     {
-      "ip" : "192.168.1.133",
+      "ip" : "192.168.1.12",
       "pcl_data_type" : 1,
       "pattern_mode" : 0,
       "extrinsic_parameter" : {

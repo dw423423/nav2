@@ -1,7 +1,7 @@
 
 cmds=(  "ros2 launch livox_ros_driver2 msg_MID360_launch.py"
 		"ros2 launch fast_lio mapping.launch.py"
-		
+		"ros2 launch octomap_server2 octomap_server_launch.py"
 	 )
 
 #"ros2 launch pcd2pgm pcd2pgm.launch.py"

@@ -23,13 +23,15 @@ def generate_launch_description():
         Node(
             package='pointcloud_to_laserscan', executable='pointcloud_to_laserscan_node',
             remappings=[
-                ('cloud_in', '/livox/lidar'),   # 直接订阅真实点云
+                ('cloud_in', '/cloud_registered'),   # 直接订阅真实点云/cloud_registered
+                # ('cloud_in', '/livox/lidar'),   # 直接订阅真实点云
+                # ('cloud_in', '/Laser_map'),   # 直接订阅真实点云
                 ('scan', '/scan')  # 输出 /scanner/scan
             ],
             parameters=[{
                 'target_frame': 'livox_frame',  # 坐标系要与 TF 匹配
                 'transform_tolerance': 0.01,
-                'min_height': -0.09,  # 可根据实际调整
+                'min_height': -0.01,  # 可根据实际调整
                 'max_height': 0.35,
                 'angle_min': -3.14159,
                 'angle_max': 3.14159,

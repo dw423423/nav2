@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<robot name="diff_drive_robot" >
+
+  <!-- 只保留必要的视觉元素，移除碰撞和惯性 -->
+  
+  <!-- 基座足迹 -->
+  <link name="base_footprint">
+    <visual>
+      <geometry>
+        <sphere radius="0.001"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- 基座链接 -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.30" length="0.12"/>
+      </geometry>
+      <origin xyz="0 0 0.06" rpy="0 0 0"/>
+      <material name="blue">
+        <color rgba="0.0 0.4 0.8 1.0"/>
+      </material>
+    </visual>
+    <!-- 移除collision和inertial以减轻计算负担 -->
+  </link>
+
+  <!-- 基座关节 -->
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.06" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 左轮（简化版） -->
+  <link name="left_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.02"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="0 0.15 -0.05" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- 右轮（简化版） -->
+  <link name="right_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.02"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="0 -0.15 -0.05" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- 激光雷达（简化版） -->
+  <link name="laser_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.08"/>
+      </geometry>
+      <material name="green">
+        <color rgba="0.0 0.8 0.0 0.8"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser_link"/>
+    <origin xyz="0.10 0 0.18" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 添加livox_frame，指向同一位置（覆盖驱动发布的TF） -->
+  <link name="livox_frame">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>  <!-- 小点表示实际位置 -->
+      </geometry>
+      <material name="red">
+        <color rgba="1.0 0.0 0.0 0.5"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="livox_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="livox_frame"/>
+    <origin xyz="0.10 0 0.18" rpy="0 0 0"/>  <!-- 与实际安装一致 -->
+  </joint>
+
+</robot>
