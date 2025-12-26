@@ -3,7 +3,7 @@
     use_sim_time: false 
     rough_leaf_size: 0.4
     refine_leaf_size: 0.1
-    pcd_path: "/home/union/ros2_humble_2D/test1.pcd"
+    pcd_path: "/home/hero/ros2_humble_2D/test1.pcd"
     map_frame_id: "map"
     odom_frame_id: "odom"
     laser_frame_id: "base_link"

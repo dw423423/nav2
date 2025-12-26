@@ -268,7 +268,7 @@ class CmdVelSubscriber(Node):
         
         # 发布到diablo/MotionCmd话题
         self.ctrl_msgs.value.forward = vx
-        self.ctrl_msgs.value.left =   wz
+        self.ctrl_msgs.value.left = 0.6*wz
         # self.ctrl_msgs.value.forward = 0.0
         # self.ctrl_msgs.value.left = 10.0
         self.motion_publisher.publish(self.ctrl_msgs)

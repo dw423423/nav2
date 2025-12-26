@@ -188,8 +188,8 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 15.0
-      publish_frequency: 10.0
+      update_frequency: 30.0
+      publish_frequency: 25.0
       global_frame: odom
       robot_base_frame: base_link
       use_sim_time: False
@@ -204,7 +204,7 @@ local_costmap:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: True
         cost_scaling_factor: 5.0
-        inflation_radius: 0.4     #膨胀半径
+        inflation_radius: 0.35     #膨胀半径
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -266,8 +266,8 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 10.0
-      publish_frequency: 5.0
+      update_frequency: 30.0
+      publish_frequency: 25.0
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False
@@ -296,7 +296,7 @@ global_costmap:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: True
         cost_scaling_factor: 5.0
-        inflation_radius: 0.4         #膨胀半径0.45
+        inflation_radius: 0.3         #膨胀半径0.45
       
       always_send_full_costmap: True
 
