@@ -24,5 +24,5 @@ for cmd in "${cmds[@]}"
 do
 	echo Current CMD : "$cmd"
 	gnome-terminal -- bash -c "cd $(pwd);source install/setup.bash;$cmd;exec bash;"
-	sleep 3
+	sleep 1
 done
