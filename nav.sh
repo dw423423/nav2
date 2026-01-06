@@ -1,7 +1,7 @@
 cmds=(
 	
 	"ros2 launch livox_ros_driver2 msg_MID360_launch.py"
-	"ros2 launch robot_navigation2 robot_state_publisher.launch.py"
+	# "ros2 launch robot_navigation2 robot_state_publisher.launch.py"
 	"ros2 launch fast_lio mapping.launch.py"
 	"ros2 launch serial_node serial_comm.launch.py "
 	"ros2 launch pointcloud_to_laserscan pointcloud_to_laserscan_launch.py"

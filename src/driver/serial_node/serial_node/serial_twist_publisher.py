@@ -244,7 +244,7 @@ class CmdVelSubscriber(Node):
         # 订阅 /cmd_vel 话题
         self.subscription = self.create_subscription(
             Twist,           # 消息类型
-            '/cmd_vel',      # 话题名称
+            '/cmd_vel_nav',      # 话题名称
             self.listener_callback,  # 回调函数
             10               # QoS profile depth
         )
