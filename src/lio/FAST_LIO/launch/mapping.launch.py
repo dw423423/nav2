@@ -14,7 +14,7 @@ def generate_launch_description():
     package_path = get_package_share_directory('fast_lio')
     default_config_path = os.path.join(package_path, 'config')
     default_rviz_config_path = os.path.join(
-        package_path, 'rviz', 'fastlio.rviz')
+        package_path, 'rviz', 'fastlio2.rviz')
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     config_path = LaunchConfiguration('config_path')
@@ -56,7 +56,7 @@ def generate_launch_description():
         arguments=['-d', rviz_cfg],
         condition=IfCondition(rviz_use)
     )
-
+ 
     ld = LaunchDescription()
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_config_path_cmd)
@@ -66,5 +66,6 @@ def generate_launch_description():
 
     ld.add_action(fast_lio_node)
     ld.add_action(rviz_node)
+
 
     return ld

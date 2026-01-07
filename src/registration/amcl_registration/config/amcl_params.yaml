@@ -1,7 +1,8 @@
 amcl:
   ros__parameters:
+    enabled: true
     use_sim_time: false
-    base_frame_id: "base_link"
+    base_frame_id: "base_footprint"
     global_frame_id: "map"
     odom_frame_id: "odom"
     tf_broadcast: true

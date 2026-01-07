@@ -7,7 +7,13 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description():
     fishbot_navigation2_dir = get_package_share_directory('robot_navigation2')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
+
+    my_rviz_dir = get_package_share_directory('robot_navigation2')
+    default_rviz_config_path = os.path.join(
+        my_rviz_dir, 'rviz', 'nav2.rviz')
+
     rviz_config_dir = os.path.join(nav2_bringup_dir, 'rviz', 'nav2_default_view.rviz')
+    
 
 
 
@@ -46,7 +52,8 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'params_file': nav2_param_path,
                 'map': '',                  
-                'use_map_topic': 'true'     
+                'use_map_topic': 'true',
+                'localization': 'false'    
             }.items(),
         ),
 
@@ -54,7 +61,7 @@ def generate_launch_description():
             package='rviz2',
             executable='rviz2',
             name='rviz2',
-            arguments=['-d', rviz_config_dir],
+            arguments=['-d', default_rviz_config_path],
             parameters=[{'use_sim_time': use_sim_time}],
             output='screen'),
     ])

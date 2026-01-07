@@ -145,7 +145,7 @@ shared_ptr<Preprocess> p_pre(new Preprocess());
 shared_ptr<ImuProcess> p_imu(new ImuProcess());
 
 std::string world_frame_id = "odom";
-std::string next_frame_id = "base_link";
+std::string next_frame_id = "base_footprint";
 void SigHandle(int sig)
 {
     flg_exit = true;
