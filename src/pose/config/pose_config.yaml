@@ -1,0 +1,12 @@
+/pose_node:
+  ros__parameters:
+    goal_point: [0.761, -0.045, 0.0,
+                9.034, -2.0, 0.0
+
+                            ]
+       
+    initial_point:
+    - 0.0
+    - 0.0
+    - 0.0
+    use_sim_time: false

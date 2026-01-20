@@ -6,7 +6,8 @@
     pcd_path: "/home/hero/ros2_humble_2D/test1.pcd"
     map_frame_id: "map"
     odom_frame_id: "odom"
-    laser_frame_id: "base_link"
+    # laser_frame_id: "base_link"
+    laser_frame_id: "livox_frame"
     # pointcloud_topic: "/livox/lidar"
     pointcloud_topic: "/cloud_registered"
     thresh: 0.1
