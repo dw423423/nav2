@@ -1,19 +1,21 @@
 cmds=(
 	
-	"ros2 launch livox_ros_driver2 msg_MID360_launch.py"
+	"ros2 launch livox_ros_driver2 msg_MID360_launch.py"    #发布/livox/imu  /livox/lidar
 	"ros2 launch robot_navigation2 robot_state_publisher.launch.py"
-	"ros2 launch fast_lio mapping.launch.py"
+	"ros2 launch fast_lio mapping.launch.py"				#发布/cloud_effected	/cloud_registered	/cloud_registered_body
 	"ros2 launch serial_node serial_comm.launch.py "
-	"ros2 launch pointcloud_to_laserscan pointcloud_to_laserscan_launch.py"
+	"ros2 launch pointcloud_to_laserscan pointcloud_to_laserscan_launch.py"   #局部代价地图 发布/scan
 	# "ros2 launch octomap_server2 octomap_server_launch.py"
-	"ros2 launch pcd2pgm pcd2pgm.launch.py"
+	# "ros2 launch pcd2pgm pcd2pgm.launch.py"
 	# "ros2 launch amcl_registration amcl.launch.py"
-	# "ros2 launch icp_registration icp.launch.py"	
+	"ros2 launch icp_registration icp.launch.py"	
 	"ros2 launch robot_navigation2 navigation2.launch.py"
 	"ros2 run diablo_ctrl diablo_ctrl_node"
 	# "ros2 launch pose pose.launch.py"
 
 	 )
+
+
 
 
 #"ros2 launch amcl_registration amcl.launch.py"
