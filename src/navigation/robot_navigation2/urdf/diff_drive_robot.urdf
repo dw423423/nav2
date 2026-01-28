@@ -89,7 +89,13 @@
     <origin xyz="0.10 0.01 0.20" rpy="0 0 0"/>
   </joint>
 
-  <!-- 添加livox_frame，指向同一位置（覆盖驱动发布的TF） -->
+  <!-- livox_frame与laser_link重合 -->
+  <joint name="livox_to_laser_joint" type="fixed">
+    <parent link="laser_link"/>
+    <child link="livox_frame"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
   <link name="livox_frame">
     <visual>
       <geometry>
@@ -100,11 +106,5 @@
       </material>
     </visual>
   </link>
-
-  <joint name="livox_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="livox_frame"/>
-    <origin xyz="0.10 0 0.18" rpy="0 0 0"/>  <!-- 与实际安装一致 -->
-  </joint>
-
+  
 </robot>

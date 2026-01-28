@@ -35,15 +35,15 @@ def generate_launch_description():
         ),
 
         # 启动 lifecycle_manager 控制 AMCL 状态
-        Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            name='lifecycle_manager_localization',
-            output='screen',
-            parameters=[{
-                'use_sim_time': use_sim_time,
-                'autostart': True,
-                'node_names': ['amcl']
-            }]
-        )
+        # Node(
+        #     package='nav2_lifecycle_manager',
+        #     executable='lifecycle_manager',
+        #     name='lifecycle_manager_localization',
+        #     output='screen',
+        #     parameters=[{
+        #         'use_sim_time': use_sim_time,
+        #         'autostart': True,
+        #         'node_names': ['amcl']
+        #     }]
+        # )
     ])

@@ -45,18 +45,18 @@ def generate_launch_description():
             output='screen'
         ),
 
+
         launch.actions.IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                [nav2_bringup_dir, '/launch', '/bringup_launch.py']),
+                [fishbot_navigation2_dir, '/launch', '/custom_bringup', '/bringup_launch.py']),  # 修改为本地的bringup_launch.py
             launch_arguments={
                 'use_sim_time': use_sim_time,
                 'params_file': nav2_param_path,
-                'map': '/home/hero/ros2_humble_2D_backup/src/navigation/robot_navigation2/maps/map.yaml',                  
-                'use_map_topic': 'true',
-                'localization': 'false'    
+                'map': '/home/hero/ros2_humble_2D_backup/src/navigation/robot_navigation2/maps/map_2d.yaml',                  
+                'use_map_topic': 'true'
+                
             }.items(),
         ),
-
         launch_ros.actions.Node(
             package='rviz2',
             executable='rviz2',
