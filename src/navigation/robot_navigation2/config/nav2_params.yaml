@@ -90,7 +90,7 @@ controller_server:
       movement_time_allowance: 3.0
     # Goal checker parameters
     general_goal_checker:
-      stateful: False
+      stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.1
       yaw_goal_tolerance: 0.5     
@@ -112,8 +112,8 @@ controller_server:
       wz_max: 1.0
       wz_min: -1.0
       near_goal_distance: 0.4  # 当距离目标小于这个距离时开始减速
-      min_vel_x_near_goal: 0.1  # 接近目标时的最小速度
-      min_vel_y_near_goal: 0.1      
+      min_vel_x_near_goal: 0.0  # 接近目标时允许完全停止以便原地调整朝向
+      min_vel_y_near_goal: 0.0      
       iteration_count: 1
       prune_distance: 1.7
       transform_tolerance: 0.5
@@ -479,5 +479,4 @@ velocity_smoother:
     odom_duration: 0.1
     deadband_velocity: [0.05, 0.05, 0.05]
     velocity_timeout: 1.0
-
 
