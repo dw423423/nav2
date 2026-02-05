@@ -52,18 +52,28 @@ def generate_launch_description():
             launch_arguments={
                 'use_sim_time': use_sim_time,
                 'params_file': nav2_param_path,
-                'map': '/home/hero/ros2_humble_2D_backup/src/navigation/robot_navigation2/maps/map_2d.yaml',                  
-                'use_map_topic': 'true'
+                'map': '/home/hero/ros2_humble_2D_backup_omin/map.yaml',                  
+                'use_map_topic': 'true',
+                'slam': 'true'
                 
             }.items(),
         ),
-        launch_ros.actions.Node(
+        # launch_ros.actions.Node(
+        #     package='rviz2',
+        #     executable='rviz2',
+        #     name='rviz2',
+        #     arguments=['-d', default_rviz_config_path],
+        #     parameters=[{'use_sim_time': use_sim_time}],
+        #     output='screen'),
+
+
+           launch_ros.actions.Node(
             package='rviz2',
             executable='rviz2',
             name='rviz2',
-            arguments=['-d', default_rviz_config_path],
+            arguments=['-d', rviz_config_dir],
             parameters=[{'use_sim_time': use_sim_time}],
-            output='screen'),
+            output='screen'),         
     ])
 
 

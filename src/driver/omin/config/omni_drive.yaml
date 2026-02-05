@@ -1,0 +1,24 @@
+# 四轮全向底盘配置
+
+omni_drive_node:
+  ros__parameters:
+    # 运动学参数
+    wheel_radius: 0.107            # 轮子半径 (米)
+    wheel_distance: 0.251         # 轮子到底盘中心的距离 (米)
+    
+    # CAN接口配置
+    can_channel: "can2"           # CAN接口名称
+    can_bitrate: 500000           # CAN波特率 (bps)
+    setup_can_interface: true     # 是否自动配置CAN接口
+    
+    # 驱动器地址
+    driver1_address: 1            # 驱动器1地址 (前轮) - 0x01
+    driver2_address: 2            # 驱动器2地址 (后轮) - 0x02
+    
+    # 速度限制
+    max_linear_speed: 1.0         # 最大线速度 (m/s)
+    max_angular_speed: 2.0        # 最大角速度 (rad/s)
+    
+    # 控制参数
+    publish_rate: 100.0            # 发布频率 (Hz)
+    timeout: 1.0                  # 速度命令超时时间 (秒)

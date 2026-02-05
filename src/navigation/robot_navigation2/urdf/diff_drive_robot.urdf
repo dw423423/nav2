@@ -16,9 +16,10 @@
   <link name="base_link">
     <visual>
       <geometry>
-        <cylinder radius="0.30" length="0.12"/>
+        <!-- 车体直径502mm，高度250mm(从50mm到底300mm) -->
+        <cylinder radius="0.251" length="0.25"/>
       </geometry>
-      <origin xyz="0 0 0.06" rpy="0 0 0"/>
+      <origin xyz="0 0 0.125" rpy="0 0 0"/>
       <material name="blue">
         <color rgba="0.0 0.4 0.8 1.0"/>
       </material>
@@ -30,7 +31,8 @@
   <joint name="base_footprint_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
-    <origin xyz="0 0 0.06" rpy="0 0 0"/>
+    <!-- 地面到车底50mm -->
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
   </joint>
 
   <!-- 左轮（简化版） -->
@@ -49,7 +51,8 @@
   <joint name="left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
-    <origin xyz="0 0.15 -0.05" rpy="0 0 0"/>
+    <!-- 轮子位置调整到车体底部附近 -->
+    <origin xyz="0 0.251 -0.075" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
 
@@ -67,7 +70,8 @@
   <joint name="right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
-    <origin xyz="0 -0.15 -0.05" rpy="0 0 0"/>
+    <!-- 轮子位置调整到车体底部附近 -->
+    <origin xyz="0 -0.251 -0.075" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
 
@@ -86,7 +90,8 @@
   <joint name="laser_joint" type="fixed">
     <parent link="base_link"/>
     <child link="laser_link"/>
-    <origin xyz="0.10 0.01 0.20" rpy="0 0 0"/>
+    <!-- 雷达放在车顶中间 -->
+    <origin xyz="0.22 0 0.25" rpy="0 0 0"/>
   </joint>
 
   <!-- livox_frame与laser_link重合 -->
