@@ -18,7 +18,7 @@ class PS2ControllerNode(Node):
         # 参数配置
         self.declare_parameter('linear_scale', 0.5)  # 线速度缩放因子 (m/s)
         self.declare_parameter('angular_scale', 1.0) # 角速度缩放因子 (rad/s)
-        self.declare_parameter('publish_rate', 200.0) # 发布频率 (Hz)
+        self.declare_parameter('publish_rate', 100.0) # 发布频率 (Hz)
         self.declare_parameter('deadzone', 0.1)      # 摇杆死区
         
         self.linear_scale = self.get_parameter('linear_scale').value
@@ -179,7 +179,7 @@ class PS2ControllerNode(Node):
             right_x = self.axis_data.get(2, 0.0) # 右摇杆左右
             
             # 左摇杆控制：输出x和y轴的正负方向速度
-            max_linear_speed = 0.3  # 最大线速度
+            max_linear_speed = -0.3  # 最大线速度
             
             # 直接映射摇杆值到速度，保留正负方向
             twist_msg.linear.x = left_y * max_linear_speed   # 前后移动（注意Y轴向下为正，所以直接使用）

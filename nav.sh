@@ -14,14 +14,14 @@ cmds=(
 	"ros2 launch pointcloud_to_laserscan pointcloud_to_laserscan_launch.py"   #局部代价地图 发布/scan
 	# "ros2 launch octomap_server2 octomap_server_launch.py"
 	# "ros2 launch pcd2pgm pcd2pgm.launch.py"
-	
+	# "ros2 launch icp_registration icp.launch.py"
 
 	"ros2 launch robot_navigation2 navigation2.launch.py"
 	# "ros2 launch slam_toolbox localization_launch.py"
 	# "ros2 launch slam_toolbox location_launch.py"
 	# "ros2 launch slam_toolbox online_async_launch.py"
 
-	# "ros2 launch icp_registration icp.launch.py"	
+		
 	# "ros2 launch amcl_registration amcl.launch.py"
 
 	# "ros2 launch pose pose.launch.py"
