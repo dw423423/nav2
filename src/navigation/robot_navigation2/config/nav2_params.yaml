@@ -93,16 +93,16 @@ controller_server:
       yaw_goal_tolerance: 0.1   
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"    
-      time_steps: 100 # prediction horizon = time_steps x model_dt = 3s
-      model_dt: 0.02   # =1/controller_frequency
+      time_steps: 150 # prediction horizon = time_steps x model_dt = 3s
+      model_dt: 0.01   # =1/controller_frequency
       batch_size: 1000
-      vx_std: 0.15
-      vy_std: 0.15
-      wz_std: 0.35
-      vx_max: 0.25 # prediction horizon x vx_max = 3.0 m -->local costmap dim should larger than 3.0 x 2 = 6m
-      vx_min: -0.25 # Maximum reverse velocity (m/s).
-      vy_max: 0.25
-      vy_min: -0.25
+      vx_std: 0.78
+      vy_std: 0.78
+      wz_std: 0.6
+      vx_max: 1.4 # prediction horizon x vx_max = 3.0 m -->local costmap dim should larger than 3.0 x 2 = 6m
+      vx_min: -1.4 # Maximum reverse velocity (m/s).
+      vy_max: 1.4
+      vy_min: -1.4
       wz_max: 2.0
       wz_min: -2.0
       # near_goal_distance: 0.4  # 当距离目标小于这个距离时开始减速
@@ -112,7 +112,7 @@ controller_server:
       prune_distance: 1.7
       transform_tolerance: 0.5
       temperature: 0.3
-      gamma: 0.03
+      gamma: 0.05
       motion_model: "Omni"
       visualize: false
       TrajectoryVisualizer:
@@ -249,10 +249,10 @@ global_costmap:
       robot_radius: 0.26
       resolution: 0.05
       track_unknown_space: true
-      plugins: ["static_layer", "obstacle_layer", "global_inflation_layer"]
+      plugins: ["static_layer", "global_inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
-        enabled: True
+        enabled: false
         observation_sources: scan
         scan:
           topic: /scan
@@ -486,10 +486,10 @@ velocity_smoother:
     smoothing_frequency: 100.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.25, 0.25, 2.0]
-    min_velocity: [-0.25, -0.25, -2.0]
-    max_accel: [0.4, 0.4, 2.0]
-    max_decel: [-0.6, -0.6, -3.0]
+    max_velocity: [1.2, 1.2, 1.0]
+    min_velocity: [-1.2, -1.2, -1.0]
+    max_accel: [3.0, 3.0, 1.0]
+    max_decel: [-3.0, -3.0, -1.0]
     odom_topic: "odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]

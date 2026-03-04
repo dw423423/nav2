@@ -38,7 +38,7 @@ def generate_launch_description():
         DeclareLaunchArgument('color_free/b', default_value='1.0'),
         DeclareLaunchArgument('color_free/a', default_value='1.0'),
         DeclareLaunchArgument('publish_free_space', default_value='False'),
-        DeclareLaunchArgument('pointcloud_min_height', default_value='-0.12'),    #机器人高低度 单位m
+        DeclareLaunchArgument('pointcloud_min_height', default_value='0.1'),    #机器人高低度 单位m
         DeclareLaunchArgument('pointcloud_max_height', default_value='0.35'),    #机器人低高度 单位m
 
 

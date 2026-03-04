@@ -8,6 +8,7 @@ Panels:
         - /Status1
         - /TF1
         - /Odometry1
+        - /Map1
       Splitter Ratio: 0.5
     Tree Height: 549
   - Class: rviz_common/Selection
@@ -36,7 +37,15 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        base_footprint:
+          Value: true
         base_link:
+          Value: true
+        laser_link:
+          Value: true
+        livox_frame:
+          Value: true
+        map:
           Value: true
         odom:
           Value: true
@@ -46,9 +55,13 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        odom:
-          base_link:
-            {}
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                laser_link:
+                  livox_frame:
+                    {}
       Update Interval: 0
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -121,8 +134,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 3.7454912662506104
-        Min Value: -0.3052697479724884
+        Max Value: 3.9606401920318604
+        Min Value: -0.13453039526939392
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -130,7 +143,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: AxisColor
       Decay Time: 30
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 186
@@ -151,7 +164,7 @@ Visualization Manager:
         Value: /cloud_registered
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -232,13 +245,13 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /projected_map
+        Value: /map
       Update Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /projected_map_updates
+        Value: /map_updates
       Use Timestamp: false
       Value: true
   Enabled: true
@@ -287,7 +300,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 15.829906463623047
+      Distance: 19.968366622924805
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -302,10 +315,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.0297967195510864
+      Pitch: 1.3147964477539062
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 3.870368480682373
+      Yaw: 3.410367488861084
     Saved: ~
 Window Geometry:
   Displays:

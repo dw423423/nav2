@@ -12,7 +12,7 @@ class TestVelocity(Node):
         
     def test_movement(self):
         # 测试向前移动
-        self.send_velocity(0.0, 0.0, 0.1, 0.0)
+        self.send_velocity(0.0, 0.0, 4.1, 0.0)
         
 
     

@@ -1,5 +1,5 @@
 
-cmds=(  "ros2 run octomap_server octomap_saver_node --ros-args -p octomap_path:=map.bt -p save_path:=/home/hero/ros2_humble_2D_backup/")
+cmds=(  "ros2 run octomap_server octomap_saver_node --ros-args -p octomap_path:=map.bt -p save_path:=/home/hero/ros2_humble_2D_backup_omin/")
 
 
 
