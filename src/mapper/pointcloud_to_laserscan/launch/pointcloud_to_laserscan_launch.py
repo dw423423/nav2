@@ -30,7 +30,8 @@ def generate_launch_description():
             ],
             parameters=[{
                 'target_frame': 'livox_frame',  # 坐标系要与 TF 匹配
-                'transform_tolerance': 0.01,
+                'transform_tolerance': 0.5,
+                'queue_size': 20,
                 'min_height': 0.10,  # 可根据实际调整
                 'max_height': 0.35,
                 'angle_min': -3.14159,

@@ -31,6 +31,7 @@ setup(
             ,"v1_node = pose.v1:main"
             ,"v2_node = pose.v2:main"
             ,"speech_recognition_node = pose.speech_recognition:main"
+            ,"2d = pose.2d_pose:main"
         ],
     },
 )
