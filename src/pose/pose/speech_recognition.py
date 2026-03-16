@@ -1,158 +1,209 @@
 #!/usr/bin/env python3
-# coding=utf8
+# coding=utf-8
+
 import rclpy
-from rclpy.node import Node
 import smbus
 import time
-from std_msgs.msg import Int32, String
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy
+import tf_transformations
 
-# I2C地址
-I2C_ADDR = 0x34  # I2C地址
-ASR_RESULT_ADDR = 100  # ASR结果寄存器地址
-ASR_SPEAK_ADDR = 110  # ASR说话寄存器地址
-ASR_CMDMAND = 0x00
-ASR_ANNOUNCER = 0xFF
+from nav2_simple_commander.robot_navigator import BasicNavigator
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Int32, String
+
+
+I2C_ADDR = 0x34
+ASR_RESULT_ADDR = 100   # 0x64
+
 
 class ASRModule:
     def __init__(self, address, bus=7):
-        # 初始化 I2C 总线和设备地址
-        self.bus = smbus.SMBus(bus)  # 使用 I2C 总线 7
-        self.address = address  # 设备的 I2C 地址
-        self.send = [0, 0]  # 初始化发送数据的数组
-
-    def wire_write_byte(self, val):
-        """
-        向设备写入单个字节
-        :param val: 要写入的字节值
-        :return: 如果成功写入返回 True，失败返回 False
-        """
-        try:
-            self.bus.write_byte(self.address, val) # 发送字节到设备
-            return True # 写入成功
-        except IOError:
-            return False # 写入失败，返回 False
-
-    def wire_write_data_array(self, reg, val, length):
-        """
-        向指定寄存器写入字节数组
-        :param reg: 寄存器地址
-        :param val: 要写入的字节数组
-        :param length: 要写入的字节数
-        :return: 如果成功写入返回 True，失败返回 False
-        """
-        try:            
-            self.bus.write_i2c_block_data(self.address, reg, val[:length]) # 发送字节数组到设备的指定寄存器
-            return True # 写入成功
-        except IOError:
-            return False # 写入失败，返回 False
+        self.bus = smbus.SMBus(bus)
+        self.address = address
 
     def wire_read_data_array(self, reg, length):
-        """
-        从指定寄存器读取字节数组
-        :param reg: 寄存器地址
-        :param length: 要读取的字节数
-        :return: 读取到的字节数组，失败时返回空数组
-        """         
         try:
-            result = self.bus.read_i2c_block_data(self.address, reg, 1) # 从设备读取字节数组
-            return result # 返回读取结果
+            return self.bus.read_i2c_block_data(self.address, reg, length)
         except IOError:
-            return [] # 读取失败，返回空数组
+            return []
 
     def rec_recognition(self):
-        """
-        识别结果读取
-        :return: 识别结果，如果读取失败返回 0
-        """
-        result = self.wire_read_data_array(ASR_RESULT_ADDR, 1) # 从结果寄存器读取一个字节
+        result = self.wire_read_data_array(ASR_RESULT_ADDR, 1)
         if result:
-            return result # 返回读取到的结果
-        return 0  # 如果没有结果，返回 0
-
-    def speak(self, cmd, id):
-        """
-        向设备发送说话命令
-        :param cmd: 命令字节
-        :param id: 说话的 ID
-        """
-        if cmd == ASR_ANNOUNCER or cmd == ASR_CMDMAND: # 检查命令是否有效
-            self.send[0] = cmd # 设置发送数组的第一个元素为命令
-            self.send[1] = id # 设置发送数组的第二个元素为 ID
-            self.wire_write_data_array(ASR_SPEAK_ADDR, self.send, 2) # 发送命令和 ID 到指定寄存器
+            return result
+        return [0]
 
 
-class SpeechRecognitionNode(Node):
-    def __init__(self):
-        super().__init__('speech_recognition_node')
-        
-        # 初始化参数
+class VoiceNavNode(BasicNavigator):
+    def __init__(self, node_name="voice_nav_node"):
+        super().__init__(node_name)
+
         self.declare_parameter('i2c_address', I2C_ADDR)
         self.declare_parameter('i2c_bus', 7)
-        self.i2c_address = self.get_parameter('i2c_address').get_parameter_value().integer_value
-        self.i2c_bus = self.get_parameter('i2c_bus').get_parameter_value().integer_value
-        
-        # 初始化ASR模块
-        self.asr_module = ASRModule(self.i2c_address, self.i2c_bus)
-        
-        # 创建发布者
-        qos = QoSProfile(depth=10)
-        self.result_publisher = self.create_publisher(Int32, 'asr_result', qos)
-        self.command_publisher = self.create_publisher(String, 'voice_command', qos)
-        
-        # 创建定时器，定期读取识别结果
-        self.timer = self.create_timer(0.1, self.read_asr_result)  # 每0.1秒读取一次
-        
-        self.get_logger().info(f'语音识别节点已启动，I2C地址: 0x{self.i2c_address:02X}, 总线: {self.i2c_bus}')
 
-    def read_asr_result(self):
-        """
-        定期读取ASR识别结果并发布
-        """
-        recognition_result = self.asr_module.rec_recognition()
-        
-        # 检查是否是列表类型且有数据
-        if isinstance(recognition_result, list) and recognition_result:
-            result_int = recognition_result[0]
-            # 发布整数结果
-            result_msg = Int32()
-            result_msg.data = result_int
-            self.result_publisher.publish(result_msg)
-            
-            # 根据识别结果发布相应的命令字符串
-            command_str = self.get_command_string(result_int)
-            if command_str:
-                command_msg = String()
-                command_msg.data = command_str
-                self.command_publisher.publish(command_msg)
-                
-                self.get_logger().info(f'识别结果: {command_str} (ID: {result_int})')
-        else:
-            # 发布0表示无识别结果
-            result_msg = Int32()
-            result_msg.data = 0
-            self.result_publisher.publish(result_msg)
+        self.declare_parameter('point_go',   [-18.0, 3.15, 0.0])
+        self.declare_parameter('point_back', [-8.63,   1.98,  0.0])
+        self.declare_parameter('point_left', [-11.4, 20.0,  1.57])
+        self.declare_parameter('point_right',[0.0,   -1.0, -1.57])
+
+        self.i2c_address = self.get_parameter('i2c_address').value
+        self.i2c_bus = self.get_parameter('i2c_bus').value
+
+        self.point_go = self.get_parameter('point_go').value
+        self.point_back = self.get_parameter('point_back').value
+        self.point_left = self.get_parameter('point_left').value
+        self.point_right = self.get_parameter('point_right').value
+
+        self.asr_module = ASRModule(self.i2c_address, self.i2c_bus)
+
+        self.result_publisher = self.create_publisher(Int32, 'asr_result', 10)
+        self.command_publisher = self.create_publisher(String, 'voice_command', 10)
+
+        self.last_cmd_id = 0
+        self.last_cmd_time = 0.0
+        self.same_cmd_ignore_sec = 2.0
+
+        self.get_logger().info(
+            f'语音导航节点已启动, I2C地址: 0x{self.i2c_address:02X}, 总线: {self.i2c_bus}'
+        )
+
+    def get_pose_by_xyyaw(self, x, y, yaw):
+        pose = PoseStamped()
+        pose.header.frame_id = 'map'
+        pose.header.stamp = self.get_clock().now().to_msg()
+
+        pose.pose.position.x = float(x)
+        pose.pose.position.y = float(y)
+        pose.pose.position.z = 0.0
+
+        quat = tf_transformations.quaternion_from_euler(0, 0, yaw)
+        pose.pose.orientation.x = quat[0]
+        pose.pose.orientation.y = quat[1]
+        pose.pose.orientation.z = quat[2]
+        pose.pose.orientation.w = quat[3]
+        return pose
 
     def get_command_string(self, result_id):
-        """
-        将识别结果ID转换为命令字符串
-        """
         commands = {
-            1: 'go',
-            2: 'back',
-            3: 'left',
-            4: 'right',
-            9: 'stop'
+            128: 'go',
+            129: 'back',
+            130: 'left',
+            131: 'right',
+            132: 'stop'
         }
         return commands.get(result_id, '')
+
+    def command_to_target(self, cmd_id):
+        mapping = {
+            128: self.point_go,
+            129: self.point_back,
+            130: self.point_left,
+            131: self.point_right,
+        }
+        return mapping.get(cmd_id, None)
+
+    def publish_asr_info(self, result_int, command_str=''):
+        result_msg = Int32()
+        result_msg.data = result_int
+        self.result_publisher.publish(result_msg)
+
+        if command_str:
+            command_msg = String()
+            command_msg.data = command_str
+            self.command_publisher.publish(command_msg)
+
+    def nav_to_pose_blocking(self, target_pose):
+        self.goToPose(target_pose)
+
+        while rclpy.ok() and not self.isTaskComplete():
+            feedback = self.getFeedback()
+            if feedback is not None and hasattr(feedback, 'distance_remaining'):
+                if feedback.distance_remaining is not None:
+                    self.get_logger().info(f'剩余距离: {feedback.distance_remaining:.3f}')
+            time.sleep(0.5)
+
+        result = self.getResult()
+        self.get_logger().info(f'导航结果: {result}')
+        return result
+
+    def try_read_command_once(self):
+        recognition_result = self.asr_module.rec_recognition()
+        if not (isinstance(recognition_result, list) and recognition_result):
+            return 0
+
+        result_int = recognition_result[0]
+        self.get_logger().info(f'I2C原始返回: {recognition_result}, 当前识别ID: {result_int}')
+        self.publish_asr_info(result_int)
+
+        if result_int == 0:
+            return 0
+
+        command_str = self.get_command_string(result_int)
+        if not command_str:
+            self.get_logger().info(f'收到未定义命令ID: {result_int}')
+            return 0
+
+        self.publish_asr_info(result_int, command_str)
+
+        now = time.time()
+        if result_int == self.last_cmd_id and (now - self.last_cmd_time) < self.same_cmd_ignore_sec:
+            self.get_logger().info(f'忽略重复命令: {command_str} (ID: {result_int})')
+            return 0
+
+        self.last_cmd_id = result_int
+        self.last_cmd_time = now
+
+        self.get_logger().info(f'识别到命令: {command_str} (ID: {result_int})')
+        return result_int
 
 
 def main():
     rclpy.init()
-    node = SpeechRecognitionNode()
-    
+    node = VoiceNavNode()
+
     try:
-        rclpy.spin(node)
+        while rclpy.ok():
+            rclpy.spin_once(node, timeout_sec=0.1)
+
+            cmd_id = node.try_read_command_once()
+            if cmd_id == 0:
+                time.sleep(0.1)
+                continue
+
+            if cmd_id == 132:
+                try:
+                    node.cancelTask()
+                    node.get_logger().warn('收到 stop 命令，已取消当前导航任务')
+                except Exception as e:
+                    node.get_logger().warn(f'取消任务失败: {e}')
+                time.sleep(0.2)
+                continue
+
+            target = node.command_to_target(cmd_id)
+            command_str = node.get_command_string(cmd_id)
+
+            if target is None:
+                node.get_logger().warn(f'命令 {command_str} 没有配置目标点')
+                time.sleep(0.2)
+                continue
+
+            target_pose = node.get_pose_by_xyyaw(target[0], target[1], target[2])
+
+            node.get_logger().info(
+                f'发送导航目标: {command_str} -> ({target[0]}, {target[1]}, {target[2]})'
+            )
+            node.get_logger().info(
+                f'target_pose.position=({target_pose.pose.position.x}, {target_pose.pose.position.y}), '
+                f'orientation.z={target_pose.pose.orientation.z}, orientation.w={target_pose.pose.orientation.w}'
+            )
+
+            try:
+                result = node.nav_to_pose_blocking(target_pose)
+                node.get_logger().info(f'本次语音导航结束: {result}')
+            except Exception as e:
+                node.get_logger().error(f'语音导航执行失败: {e}')
+
+            time.sleep(0.5)
+
     except KeyboardInterrupt:
         node.get_logger().info('节点被用户中断')
     finally:
@@ -160,5 +211,5 @@ def main():
         rclpy.shutdown()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
