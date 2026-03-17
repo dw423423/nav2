@@ -9,6 +9,7 @@ cmds=(
 	
 	"ros2 launch livox_ros_driver2 msg_MID360_launch.py"    #发布/livox/imu  /livox/lidar
 	"ros2 launch robot_navigation2 robot_state_publisher.launch.py"
+	"ros2 launch robot_navigation2 d435_scan.launch.py"     #发布 /d435_scan
 	"ros2 launch fast_lio mapping.launch.py"				#发布/cloud_effected	/cloud_registered	/cloud_registered_body
 	# "ros2 launch small_point_lio small_point_lio.launch.py"			
 	# "ros2 launch serial_node serial_comm.launch.py "
@@ -18,6 +19,8 @@ cmds=(
 	# "ros2 launch icp_registration icp.launch.py"
 
 	"ros2 launch robot_navigation2 navigation2.launch.py"
+	"ros2 launch pose 2d_pose.launch.py"
+	"ros2 launch pose speech_recognition.launch.py"
 	# "ros2 launch slam_toolbox localization_launch.py"
 	# "ros2 launch slam_toolbox location_launch.py"
 	# "ros2 launch slam_toolbox online_async_launch.py"

@@ -55,7 +55,8 @@ def generate_launch_description():
     package="tf2_ros",
     executable="static_transform_publisher",
     output="log" ,
-    arguments=["0", "0", "0", "0", "0", "0", "base_link", "livox_frame"]
+    # Keep this aligned with robot_navigation2/urdf/diff_drive_robot.urdf.
+    arguments=["0.09", "0", "0.10", "0", "0", "0", "base_link", "livox_frame"]
     )
     tf_adapter_2 = Node(
     package="tf2_ros",

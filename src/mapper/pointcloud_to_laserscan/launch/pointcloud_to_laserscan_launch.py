@@ -23,16 +23,20 @@ def generate_launch_description():
         Node(
             package='pointcloud_to_laserscan', executable='pointcloud_to_laserscan_node',
             remappings=[
-                ('cloud_in', '/cloud_registered'),   # 直接订阅真实点云/cloud_registered
-                # ('cloud_in', '/livox/lidar'),   # 直接订阅真实点云
-                # ('cloud_in', '/Laser_map'),   # 直接订阅真实点云
+                # Prefer the body-frame cloud so scan generation does not depend on
+                # a dynamic odom -> base transform before projecting into livox_frame.
+                ('cloud_in', '/cloud_registered_body'),
                 ('scan', '/scan')  # 输出 /scanner/scan
             ],
             parameters=[{
-                'target_frame': 'livox_frame',  # 坐标系要与 TF 匹配
+                # FAST_LIO publishes /cloud_registered_body in base_footprint.
+                # Keeping the scan in the same frame avoids reintroducing the
+                # static base_footprint -> livox_frame offset into /scan.
+                'target_frame': 'base_footprint',
                 'transform_tolerance': 0.5,
                 'queue_size': 20,
-                'min_height': 0.10,  # 可根据实际调整
+                # Keep the scan slice aligned with the documented map filtering band.
+                'min_height': -0.09,
                 'max_height': 0.35,
                 'angle_min': -3.14159,
                 'angle_max': 3.14159,
