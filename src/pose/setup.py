@@ -11,9 +11,12 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name+"/launch", glob('launch/*.launch.py')),
-        ('share/' + package_name+"/config", ['config/pose_config.yaml']),
+        ('share/' + package_name+"/config", glob('config/*.yaml')),
     ],
-    install_requires=['setuptools'],
+    install_requires=[
+        'setuptools',
+        'ultralytics',
+    ],
     zip_safe=True,
     maintainer='union',
     maintainer_email='union@todo.todo',
@@ -32,6 +35,7 @@ setup(
             ,"v2_node = pose.v2:main"
             ,"speech = pose.speech_recognition:main"
             ,"2d = pose.2d_pose:main"
+            ,"person_follower = pose.person_follower_node:main"
         ],
     },
 )

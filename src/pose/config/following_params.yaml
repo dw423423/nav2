@@ -1,40 +1,115 @@
-following_server:
+# person_follower.launch.py 默认读取这个文件。
+# 以后如果你要调视觉跟随参数，优先改这里，不需要改 Python 代码。
+
+person_follower_node:
   ros__parameters:
-    controller_frequency: 10.0
-    detection_timeout: 2.0
-    rotate_to_object_timeout: 10.0
-    static_object_timeout: 30.0
-    linear_tolerance: 0.15
-    angular_tolerance: 0.15
-    max_retries: 3
+    # ----------------------------
+    # YOLO 与相机话题
+    # ----------------------------
+    yolo_model: "/home/hero/ros2_humble_2D_backup_omin/models/yolov8n.pt"  # YOLO 模型路径
+    yolo_device: "auto"  # auto 会优先尝试 cuda:0，没有可用 GPU 时回退到 CPU
+    yolo_imgsz: 320  # YOLO 推理输入尺寸；Orin 上 320 通常比默认更稳更快
+    yolo_half: true  # GPU 上启用 FP16；CPU 上代码会自动关闭
+    yolo_max_det: 4  # 每帧最多保留的人体框数量，减少后处理开销
+    yolo_conf_threshold: 0.45  # YOLO 置信度阈值，越大越严格
+    min_person_box_height_ratio: 0.18  # 人框最小高度占图像比例，太小的目标会被过滤
+    min_person_aspect_ratio: 1.1  # 人框最小高宽比，避免把横向物体误识别成人
+    min_person_box_area_ratio: 0.015  # 人框最小面积占图像比例
 
-    base_frame: "base_link"
-    fixed_frame: "odom"
+    color_topic: "/camera/camera/color/image_raw"  # 彩色图像话题
+    depth_topic: "/camera/camera/aligned_depth_to_color/image_raw"  # 对齐到彩色图的深度图话题
+    depth_camera_info_topic: "/camera/camera/aligned_depth_to_color/camera_info"  # 深度相机内参话题
 
-    filter_coef: 0.1
-    desired_distance: 1.0
-    skip_orientation: true
-    search_by_rotating: false
+    # ----------------------------
+    # TF / 坐标系
+    # ----------------------------
+    base_frame: "base_link"  # 机器人底盘坐标系
+    camera_optical_frame: "camera_depth_optical_frame"  # 深度相机光学坐标系
+    person_frame: "person_frame"  # 发布给目标人的 TF 名称
+    cmd_vel_topic: "/cmd_vel"  # 底盘速度指令话题
 
-    odom_topic: "/Odometry"
-    odom_duration: 0.3
-    transform_tolerance: 0.1
+    # ----------------------------
+    # 状态机
+    # ----------------------------
+    lock_duration_sec: 2.0  # 候选目标连续满足条件多久后才锁定
+    lost_timeout_sec: 1.0  # 锁定后目标丢失多久回到 WAIT_TARGET
 
-    controller:
-      k_phi: 3.0
-      k_delta: 2.0
-      beta: 0.4
-      lambda: 2.0
-      v_linear_min: 0.1
-      v_linear_max: 0.5
-      v_angular_max: 1.0
-      slowdown_radius: 0.15
-      use_collision_detection: false
-      transform_tolerance: 0.5
+    # ----------------------------
+    # 距离 / 目标筛选
+    # ----------------------------
+    min_target_distance_m: 0.5  # 允许跟随的最小目标距离
+    max_target_distance_m: 4.0  # 允许跟随的最大目标距离
+    follow_distance_m: 1.7  # 期望与人的跟随距离，越大越不容易贴人
+    center_min_ratio: 0.35  # 初始锁定时，目标中心允许的最左边界（图像宽度比例）
+    center_max_ratio: 0.65  # 初始锁定时，目标中心允许的最右边界（图像宽度比例）
+    depth_window_size: 5  # 深度采样窗口大小，越大越稳但越钝
+    distance_filter_alpha: 0.03  # 距离滤波系数；进一步平滑距离抖动
+    use_scan_distance_correction: true  # 使用 /d435_scan 只向近处修正 YOLO 深度距离
+    scan_topic: "/d435_scan"  # 用于距离修正的激光扫描话题
+    scan_angle_window_deg: 4.0  # 目标中心角附近参与修正的扫描角窗口
+    max_scan_correction_m: 0.8  # 允许 scan 将深度距离最多往近处修正多少米
+    scan_stale_timeout_sec: 0.5  # scan 超过这个时间未更新则不参与修正
 
-lifecycle_manager_following:
-  ros__parameters:
-    use_sim_time: false
-    autostart: true
-    node_names:
-      - following_server
+    # ----------------------------
+    # 速度参数
+    # 这是你后面最常改的地方
+    # ----------------------------
+    # 线速度参数
+    fixed_linear_speed: 0.65  # 中等距离误差时的前进速度；提高到更接近日常跟随步速
+    linear_fast_speed: 0.75  # 目标距离明显变远时的快速前进速度；接近正常人步行速度
+    min_linear_speed: 0.0  # 小距离误差时的最低前进速度；避免走走停停但不过猛
+    max_linear_speed: 0.80  # 线速度总上限；允许跟上正常人步行速度
+    # min_linear_speed: 0.15  # 小距离误差时的最低前进速度，单位 m/s
+    # max_linear_speed: 0.55  # 线速度总上限，单位 m/s
+    stop_deadband_m: 0.1  # 前后误差小于这个值时直接停车，避免贴近目标
+    forward_engage_error_m: 0.06  # 前后误差大于这个值时才开始前进；减小 2m 左右边走边摆
+    forward_release_error_m: 0.03  # 前进后，误差回落到这个值以下就停止；留出更大缓冲区
+    low_speed_error_m: 0.2  # 小误差段和中误差段的分界，单位 m
+    medium_speed_error_m: 0.35  # 中误差段和快速前进段的分界；拉近后更早进入追赶速度
+
+    # 角速度参数
+    fixed_angular_speed: 0.10  # 小角度误差段角速度上限；进一步减小 2m 左右摆动
+    angular_segment_k1: 0.8  # 小角度误差段比例系数；进一步降低中近距离灵敏度
+    angular_segment_k2: 1.8  # 中角度误差段比例系数；进一步降低来回震荡
+    angular_fast_speed: 1.0  # 大角度误差段固定角速度；保留快速转向但不过猛
+    angular_d_gain: 0.02  # 角速度 D 阻尼系数；先用较小阻尼，减少 2m 左右来回摆动
+    angular_d_filter_alpha: 0.10  # D 项低通滤波系数；更平滑，减少噪声放大
+    min_angular_speed: 0.12  # 角速度最小有效值；进一步减少 2m 左右来回抖动
+    max_angular_speed: 2.0  # 角速度总上限，单位 rad/s
+    lateral_deadband_m: 0.15  # 左右误差很小时不转向，减少左右抖动
+    turn_engage_error_m: 0.08  # 左右误差超过这个值才开始转向
+    turn_release_error_m: 0.06  # 转向停止死区再放大一些，减少 2m 左右来回切换
+    low_angular_error_m: 0.20  # 小角度段和中角度段的分界；让更多误差落在温和区
+    medium_angular_error_m: 0.40  # 中角度段和快速转向段的分界；减少 2m 左右进入大转向
+
+    # 保留参数
+    linear_kp: 0.8  # 当前分段线速度模式下基本不参与控制，先保留
+    angular_kp: 0.9  # 当前分段角速度模式下基本不参与控制，先保留
+    # ----------------------------
+    # 控制频率 / 调试频率
+    # ----------------------------
+    control_rate_hz: 100.0  # /cmd_vel 控制频率
+    debug_rate_hz: 2.0  # 调试图像刷新频率，太大容易让 rqt 更卡
+    process_every_n_frames: 1  # 每收到多少张彩色图做一次检测；2 表示隔帧推理
+    debug_image_enabled: true  # 关闭调试图像可减少拷贝、绘图和发布开销
+    enable_per_frame_logging: false  # 逐帧日志会明显拖慢检测，默认关闭
+
+    # ----------------------------
+    # 安全停车
+    # ----------------------------
+    safety_stop_distance_m: 0.6  # 小于这个距离直接触发安全停车
+    safety_resume_distance_m: 0.8  # 触发安全停车后，拉开到这个距离才允许恢复
+    close_box_height_ratio_stop: 0.85  # 如果人框在图像里过大，也会触发安全停车
+
+    # ----------------------------
+    # 平滑 / 超时
+    # ----------------------------
+    max_linear_accel: 4.0  # 线速度变化最大加速度；略保守，提速同时避免前冲
+    max_angular_accel: 3.0  # 角速度变化最大加速度，越小越平滑
+    target_update_timeout_sec: 1.0  # 目标更新超时后停车
+    image_stale_timeout_sec: 2.0  # 相机图像超时后标记为 stale 并停车；调大可减少误报
+
+    # ----------------------------
+    # 阶梯速度阈值
+    # 这里保留说明，实际生效值以上面的线速度/角速度参数为准
+    # ----------------------------

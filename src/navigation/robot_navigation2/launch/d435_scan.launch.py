@@ -10,6 +10,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     depth_profile = LaunchConfiguration('depth_profile')
+    color_profile = LaunchConfiguration('color_profile')
     scan_height = LaunchConfiguration('scan_height')
     range_min = LaunchConfiguration('range_min')
     range_max = LaunchConfiguration('range_max')
@@ -23,8 +24,13 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'depth_profile',
-            default_value='424x240x6',
+            default_value='424x240x30',
             description='D435 depth stream profile widthxheightxfps'
+        ),
+        DeclareLaunchArgument(
+            'color_profile',
+            default_value='424x240x30',
+            description='D435 color stream profile widthxheightxfps'
         ),
         DeclareLaunchArgument(
             'scan_height',
@@ -53,14 +59,16 @@ def generate_launch_description():
                 'ros2', 'launch', 'realsense2_camera', 'rs_launch.py',
                 'initial_reset:=true',
                 'pointcloud.enable:=false',
-                'align_depth.enable:=false',
-                'enable_color:=false',
+                'enable_sync:=true',
+                'align_depth.enable:=true',
+                'enable_color:=true',
                 'enable_depth:=true',
                 'enable_infra1:=false',
                 'enable_infra2:=false',
                 'enable_gyro:=false',
                 'enable_accel:=false',
                 ['depth_module.depth_profile:=', depth_profile],
+                ['rgb_camera.color_profile:=', color_profile],
             ],
             output='screen',
         ),
