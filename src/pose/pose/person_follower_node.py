@@ -62,6 +62,10 @@ class PersonFollowerNode(Node):
         self.forward_motion_active: bool = False
         self.turn_motion_direction: int = 0
         self.safety_stop_active: bool = False
+        self.front_obstacle_active: bool = False
+        self.front_obstacle_hit_count: int = 0
+        self.front_obstacle_clear_count: int = 0
+        self.last_front_obstacle_distance: Optional[float] = None
         self.last_lateral_error: Optional[float] = None
         self.filtered_lateral_error_rate: float = 0.0
         self.latest_color_image_msg: Optional[Image] = None
@@ -153,6 +157,15 @@ class PersonFollowerNode(Node):
         self.declare_parameter('scan_angle_window_deg', 4.0)
         self.declare_parameter('max_scan_correction_m', 0.8)
         self.declare_parameter('scan_stale_timeout_sec', 0.5)
+        self.declare_parameter('enable_front_obstacle_check', True)
+        self.declare_parameter('front_obstacle_sector_deg', 40.0)
+        self.declare_parameter('front_obstacle_stop_distance_m', 0.75)
+        self.declare_parameter('front_obstacle_resume_distance_m', 0.95)
+        self.declare_parameter('front_obstacle_slowdown_distance_m', 1.20)
+        self.declare_parameter('front_obstacle_slowdown_ratio', 0.35)
+        self.declare_parameter('front_obstacle_min_points', 2)
+        self.declare_parameter('front_obstacle_trigger_count', 3)
+        self.declare_parameter('front_obstacle_clear_count_threshold', 3)
         self.declare_parameter('color_topic', '/camera/camera/color/image_raw')
         self.declare_parameter(
             'depth_topic',
@@ -311,6 +324,36 @@ class PersonFollowerNode(Node):
         self.scan_stale_timeout_sec = float(
             self.get_parameter('scan_stale_timeout_sec').value
         )
+        self.enable_front_obstacle_check = bool(
+            self.get_parameter('enable_front_obstacle_check').value
+        )
+        self.front_obstacle_sector_deg = float(
+            self.get_parameter('front_obstacle_sector_deg').value
+        )
+        self.front_obstacle_stop_distance_m = float(
+            self.get_parameter('front_obstacle_stop_distance_m').value
+        )
+        self.front_obstacle_resume_distance_m = float(
+            self.get_parameter('front_obstacle_resume_distance_m').value
+        )
+        self.front_obstacle_slowdown_distance_m = float(
+            self.get_parameter('front_obstacle_slowdown_distance_m').value
+        )
+        self.front_obstacle_slowdown_ratio = float(
+            self.get_parameter('front_obstacle_slowdown_ratio').value
+        )
+        self.front_obstacle_min_points = max(
+            1,
+            int(self.get_parameter('front_obstacle_min_points').value),
+        )
+        self.front_obstacle_trigger_count = max(
+            1,
+            int(self.get_parameter('front_obstacle_trigger_count').value),
+        )
+        self.front_obstacle_clear_count_threshold = max(
+            1,
+            int(self.get_parameter('front_obstacle_clear_count_threshold').value),
+        )
         self.color_topic = self.get_parameter('color_topic').value
         self.depth_topic = self.get_parameter('depth_topic').value
         self.depth_camera_info_topic = self.get_parameter(
@@ -426,6 +469,16 @@ class PersonFollowerNode(Node):
             f'max_angular_accel={self.max_angular_accel:.2f} rad/s^2, '
             f'target_timeout={self.target_update_timeout_sec:.2f} s, '
             f'image_stale_timeout={self.image_stale_timeout_sec:.2f} s'
+        )
+        self.get_logger().info(
+            f'Front obstacle check: enabled={self.enable_front_obstacle_check}, '
+            f'sector={self.front_obstacle_sector_deg:.1f} deg, '
+            f'stop={self.front_obstacle_stop_distance_m:.2f} m, '
+            f'resume={self.front_obstacle_resume_distance_m:.2f} m, '
+            f'slowdown={self.front_obstacle_slowdown_distance_m:.2f} m, '
+            f'slowdown_ratio={self.front_obstacle_slowdown_ratio:.2f}, '
+            f'trigger_count={self.front_obstacle_trigger_count}, '
+            f'clear_count={self.front_obstacle_clear_count_threshold}'
         )
         self.log_state_transition(None, self.state)
         self.processing_thread = threading.Thread(
@@ -635,6 +688,83 @@ class PersonFollowerNode(Node):
         if depth_overestimate > self.max_scan_correction_m:
             return None
         return corrected_depth
+
+    def get_front_obstacle_distance(self) -> Optional[float]:
+        if not self.enable_front_obstacle_check:
+            return None
+        if self.last_scan_frame_sec <= 0.0:
+            return None
+        if (self.now_sec() - self.last_scan_frame_sec) > self.scan_stale_timeout_sec:
+            return None
+
+        with self.frame_lock:
+            scan_msg = self.latest_scan_msg
+        if scan_msg is None or not scan_msg.ranges:
+            return None
+
+        half_window = math.radians(max(1.0, self.front_obstacle_sector_deg) * 0.5)
+        valid_ranges = []
+        for idx, rng in enumerate(scan_msg.ranges):
+            if not math.isfinite(rng):
+                continue
+            if rng < scan_msg.range_min or rng > scan_msg.range_max:
+                continue
+            angle = scan_msg.angle_min + idx * scan_msg.angle_increment
+            if -half_window <= angle <= half_window:
+                valid_ranges.append(float(rng))
+
+        if len(valid_ranges) < self.front_obstacle_min_points:
+            return None
+
+        return min(valid_ranges)
+
+    def apply_front_obstacle_constraints(
+        self,
+        target_linear_x: float,
+        target_angular_z: float,
+    ) -> tuple[float, float]:
+        obstacle_distance = self.get_front_obstacle_distance()
+        self.last_front_obstacle_distance = obstacle_distance
+
+        if obstacle_distance is None:
+            self.front_obstacle_hit_count = 0
+            self.front_obstacle_clear_count += 1
+            if (
+                self.front_obstacle_active
+                and self.front_obstacle_clear_count >= self.front_obstacle_clear_count_threshold
+            ):
+                self.front_obstacle_active = False
+            return target_linear_x, target_angular_z
+
+        self.front_obstacle_clear_count = 0
+
+        if obstacle_distance <= self.front_obstacle_stop_distance_m:
+            self.front_obstacle_hit_count += 1
+        else:
+            self.front_obstacle_hit_count = 0
+
+        if self.front_obstacle_active:
+            if obstacle_distance < self.front_obstacle_resume_distance_m:
+                return 0.0, target_angular_z
+            self.front_obstacle_active = False
+
+        if self.front_obstacle_hit_count >= self.front_obstacle_trigger_count:
+            self.front_obstacle_active = True
+            self.forward_motion_active = False
+            now_sec = self.now_sec()
+            if now_sec - self.last_cmd_log_sec > 0.5:
+                self.get_logger().warn(
+                    f'Front obstacle stop: min_range={obstacle_distance:.3f} m, '
+                    f'keep angular_z={target_angular_z:.3f}'
+                )
+                self.last_cmd_log_sec = now_sec
+            return 0.0, target_angular_z
+
+        if obstacle_distance <= self.front_obstacle_slowdown_distance_m:
+            slowdown_ratio = min(max(self.front_obstacle_slowdown_ratio, 0.0), 1.0)
+            return target_linear_x * slowdown_ratio, target_angular_z
+
+        return target_linear_x, target_angular_z
 
     def apply_distance_filter(self, distance: float) -> float:
         if self.filtered_target_distance is None:
@@ -1260,6 +1390,10 @@ class PersonFollowerNode(Node):
             target_linear_x = self.compute_step_linear_speed(forward_error)
 
         target_angular_z = self.compute_segmented_angular_speed(lateral_error)
+        target_linear_x, target_angular_z = self.apply_front_obstacle_constraints(
+            target_linear_x,
+            target_angular_z,
+        )
         if target_angular_z > 0.0:
             self.turn_motion_direction = 1
         elif target_angular_z < 0.0:
