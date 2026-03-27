@@ -11,12 +11,7 @@ cmds=(
 	"ros2 launch robot_navigation2 robot_state_publisher.launch.py"
 	"ros2 launch robot_navigation2 d435_scan.launch.py"     #发布 /d435_scan
 	"ros2 launch fast_lio mapping.launch.py"				#发布/cloud_effected	/cloud_registered	/cloud_registered_body
-	# "ros2 launch small_point_lio small_point_lio.launch.py"			
-	# "ros2 launch serial_node serial_comm.launch.py "
 	"ros2 launch pointcloud_to_laserscan pointcloud_to_laserscan_launch.py"   #局部代价地图 发布/scan
-	# "ros2 launch octomap_server2 octomap_server_launch.py"
-	# "ros2 launch pcd2pgm pcd2pgm.launch.py"
-	# "ros2 launch icp_registration icp.launch.py"
 
 	"ros2 launch robot_navigation2 navigation2.launch.py"
 	"ros2 launch pose 2d_pose.launch.py"
@@ -39,12 +34,7 @@ cmds=(
 # "ros2 run tf2_ros static_transform_publisher 0 0 0 -45 0 0 map odom"
 
 
-# for cmd in "${cmds[@]}"
-# do
-# 	echo Current CMD : "$cmd"
-# 	gnome-terminal -- bash -c "cd $(pwd);source install/setup.bash;$cmd;exec bash;"
-# 	sleep 2
-# done
+
 
 
 for cmd in "${cmds[@]}"
